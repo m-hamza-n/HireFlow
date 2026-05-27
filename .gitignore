@@ -1,0 +1,97 @@
+# HireFlow specific
+static/resumes/
+chroma_db/
+chroma_data/
+
+# Spec and context files
+ai_context.md
+spec.md
+Hireflow master spec.md
+structure.txt
+private_notes.txt
+
+# Environment
+.env
+.env.*
+!.env.example
+.envrc
+
+# Python
+__pycache__/
+*.py[codz]
+*$py.class
+*.pyc
+*.pyo
+*.so
+*.egg-info/
+*.egg
+MANIFEST
+.installed.cfg
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pixi/*
+!.pixi/config.toml
+__pypackages__/
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+htmlcov/
+coverage.xml
+*.cover
+nosetests.xml
+
+# Celery
+celerybeat-schedule*
+celerybeat.pid
+
+# Redis
+*.rdb
+*.aof
+*.pid
+
+# IDEs
+.vscode/
+.idea/
+.spyderproject
+.spyproject
+.ropeproject
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Misc
+*.log
+*.db
+*.sqlite3
+tempCodeRunnerFile.py
+snippets.txt
+.pypirc
+cython_debug/

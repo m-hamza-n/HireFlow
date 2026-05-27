@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireFlow — AI-Powered Hiring</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .auth-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 0;
+      width: 100%;
+      max-width: 900px;
+      min-height: 600px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Left panel — branding */
+    .auth-brand {
+      background: linear-gradient(145deg, #0a1628 0%, #061120 100%);
+      padding: 52px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-brand::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .auth-brand::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(0,102,255,0.05) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .brand-logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0,212,255,0.4);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .brand-headline {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-headline h2 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .brand-headline h2 span {
+      color: var(--cyan);
+    }
+
+    .brand-headline p {
+      font-size: 0.9rem;
+      color: var(--text-3);
+      line-height: 1.65;
+      max-width: 280px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      color: var(--text-2);
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0,212,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Right panel — form */
+    .auth-form-wrap {
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-tab-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      padding: 10px 0;
+      margin-right: 24px;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+
+    .auth-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--cyan);
+    }
+
+    .auth-tab:hover:not(.active) { color: var(--text-2); }
+
+    .auth-view { display: none; }
+    .auth-view.active { display: block; }
+
+    .auth-heading {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .role-option {
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .role-option:hover { border-color: var(--border-hi); }
+
+    .role-option.selected {
+      border-color: rgba(0,212,255,0.35);
+      background: var(--cyan-dim);
+    }
+
+    .role-option input { display: none; }
+
+    .role-icon { font-size: 20px; margin-bottom: 4px; }
+
+    .role-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-2);
+    }
+
+    .err-msg {
+      background: var(--red-dim);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--r-md);
+      color: var(--red);
+      font-size: 0.82rem;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-layout fade-in">
+  <!-- Brand Panel -->
+  <div class="auth-brand">
+    <div class="brand-logo">
+      <div class="brand-logo-dot"></div>
+      HireFlow
+    </div>
+
+    <div class="brand-headline">
+      <h2>Hire smarter<br>with <span>AI</span>.</h2>
+      <p>An AI agent that screens, matches, and communicates — so your team focuses on decisions, not admin.</p>
+    </div>
+
+    <ul class="feature-list">
+      <li>
+        <div class="feature-icon">⚡</div>
+        Instant AI candidate screening
+      </li>
+      <li>
+        <div class="feature-icon">🎯</div>
+        Semantic resume matching via RAG
+      </li>
+      <li>
+        <div class="feature-icon">🔔</div>
+        Real-time WebSocket notifications
+      </li>
+      <li>
+        <div class="feature-icon">🤖</div>
+        Gemini tool-use agent built-in
+      </li>
+    </ul>
+  </div>
+
+  <!-- Form Panel -->
+  <div class="auth-form-wrap">
+    <div class="auth-tab-row">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <!-- Login View -->
+    <div class="auth-view active" id="login-view">
+      <div class="auth-heading">Welcome back</div>
+      <div id="login-err" class="err-msg hidden"></div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="log-email" placeholder="you@company.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="log-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn btn-primary btn-full mt-2" id="login-btn" onclick="handleLogin()">
+        Sign In
+      </button>
+    </div>
+
+    <!-- Register View -->
+    <div class="auth-view" id="register-view">
+      <div class="auth-heading">Create account</div>
+      <div id="reg-err" class="err-msg hidden"></div>
+
+      <div class="form-group">
+        <label>I am a</label>
+        <div class="role-selector">
+          <label class="role-option selected" id="role-candidate" onclick="selectRole('candidate')">
+            <input type="radio" name="role" value="candidate" checked>
+            <div class="role-icon">🎓</div>
+            <div class="role-label">Candidate</div>
+          </label>
+          <label class="role-option" id="role-recruiter" onclick="selectRole('recruiter')">
+            <input type="radio" name="role" value="recruiter">
+            <div class="role-icon">🏢</div>
+            <div class="role-label">Recruiter</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reg-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-pass" placeholder="Min. 6 characters" autocomplete="new-password" minlength="6">
+      </div>
+
+      <button class="btn btn-primary btn-full mt-2" id="register-btn" onclick="handleRegister()">
+        Create Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/auth.js"></script>
+<script>
+  checkAuthAndRedirect();
+
+  let selectedRole = 'candidate';
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById(tab + '-view').classList.add('active');
+  }
+
+  function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+    document.getElementById('role-' + role).classList.add('selected');
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function hideError(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  async function handleLogin() {
+    hideError('login-err');
+    const btn = document.getElementById('login-btn');
+    const email = document.getElementById('log-email').value.trim();
+    const pass = document.getElementById('log-pass').value;
+    if (!email || !pass) return showError('login-err', 'Please fill in all fields.');
+    
+    btn.textContent = 'Signing in…';
+    btn.disabled = true;
+
+    const res = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: { email, password: pass }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setTokens(data.access_token, data.refresh_token);
+      checkAuthAndRedirect();
+    } else {
+      const err = await res.json();
+      showError('login-err', err.detail || 'Invalid credentials.');
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
+  }
+
+  async function handleRegister() {
+    hideError('reg-err');
+    const btn = document.getElementById('register-btn');
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+
+    if (!name || !email || !pass) return showError('reg-err', 'Please fill in all fields.');
+    if (pass.length < 6) return showError('reg-err', 'Password must be at least 6 characters.');
+
+    btn.textContent = 'Creating account…';
+    btn.disabled = true;
+
+    const res = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: { email, password: pass, full_name: name, role: selectedRole }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setTokens(data.access_token, data.refresh_token);
+      checkAuthAndRedirect();
+    } else {
+      const err = await res.json();
+      showError('reg-err', err.detail || 'Registration failed.');
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    }
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const loginActive = document.getElementById('login-view').classList.contains('active');
+    if (loginActive) handleLogin();
+    else handleRegister();
+  });
+</script>
+</body>
+</html>

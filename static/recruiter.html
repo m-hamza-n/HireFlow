@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireFlow — Recruiter Console</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .plan-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      margin-bottom: 14px;
+    }
+
+    .plan-bar-label {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .plan-bar-upgrade {
+      margin-left: auto;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--cyan-text);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .post-job-form .form-group { margin-bottom: 12px; }
+
+    .app-row {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-row:last-child { border-bottom: none; }
+
+    .app-row-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .app-candidate {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .app-summary {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      font-style: italic;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .app-score-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 80px;
+    }
+
+    .score-num {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--cyan-text);
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .action-select {
+      width: auto;
+      padding: 5px 28px 5px 8px;
+      font-size: 0.78rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a5e7a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    .company-create-prompt {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-1);
+      border: 1px dashed var(--border);
+      border-radius: var(--r-md);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 3px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-3);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .upgrade-modal-plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .upgrade-plan-opt {
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .upgrade-plan-opt:hover { border-color: var(--border-hi); }
+
+    .upgrade-plan-opt.selected {
+      border-color: rgba(0,212,255,0.3);
+      background: var(--cyan-dim);
+    }
+
+    .plan-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .plan-price-sm {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--cyan-text);
+    }
+
+    .plan-feat {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .job-stat-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .mini-stat {
+      flex: 1;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+    }
+
+    .mini-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.04em;
+    }
+
+    .mini-stat-label {
+      font-size: 0.7rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: var(--font-display);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="notifications"></div>
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        HireFlow
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-name" id="user-name">Loading…</div>
+      <div class="user-role">Recruiter</div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="sidebar-section" id="company-section">
+      <div class="sidebar-label">Company</div>
+
+      <!-- Company exists -->
+      <div id="company-info" class="hidden">
+        <div class="plan-bar">
+          <div>
+            <div style="font-size:0.88rem; font-weight:600; color:var(--text); font-family:var(--font-display);" id="comp-name"></div>
+          </div>
+          <span class="badge mono" id="comp-plan-badge"></span>
+          <button class="plan-bar-upgrade" onclick="openUpgradeModal()" id="upgrade-link">Upgrade ↑</button>
+        </div>
+      </div>
+
+      <!-- Create company -->
+      <div id="company-create" class="hidden">
+        <div class="company-create-prompt mb-2">
+          <div style="font-size:22px; margin-bottom:8px;">🏢</div>
+          <p class="text-xs text-3">Create your company profile to start posting jobs.</p>
+        </div>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="new-comp-name" placeholder="Acme Corp">
+        </div>
+        <div class="form-group">
+          <label>Website (optional)</label>
+          <input type="text" id="new-comp-website" placeholder="https://acme.com">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="createCompany()">Create Company</button>
+      </div>
+    </div>
+
+    <!-- Post a Job -->
+    <div class="sidebar-section" id="post-job-section">
+      <div class="sidebar-label">Post a Job</div>
+      <div class="post-job-form" id="post-job-form">
+        <div class="form-group">
+          <label>Job Title</label>
+          <input type="text" id="j-title" placeholder="e.g. Backend Engineer">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="j-desc" rows="3" placeholder="Role overview, team context…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Requirements</label>
+          <textarea id="j-reqs" rows="2" placeholder="Skills, experience…"></textarea>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" class="mb-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Type</label>
+            <select id="j-type">
+              <option value="full_time">Full Time</option>
+              <option value="remote">Remote</option>
+              <option value="part_time">Part Time</option>
+              <option value="contract">Contract</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Location</label>
+            <input type="text" id="j-location" placeholder="City / Remote">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="post-btn" onclick="postJob()">Post Job</button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-full" onclick="logout()" style="color:var(--text-3);">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title" style="font-size:1rem; margin-bottom:0;">Recruiter Console</div>
+        <div class="text-xs text-3 mono" id="pipeline-count">—</div>
+      </div>
+      <div class="flex-center gap-3">
+        <button class="notif-btn" title="Notifications">🔔</button>
+      </div>
+    </div>
+
+    <div class="page-area">
+      <!-- Stats Row -->
+      <div class="job-stat-row" id="stats-row" style="display:none;">
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-jobs">0</div>
+          <div class="mini-stat-label">Active Jobs</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-apps">0</div>
+          <div class="mini-stat-label">Applications</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" id="stat-shortlisted">0</div>
+          <div class="mini-stat-label">Shortlisted</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" id="main-tabs" style="display:none;">
+        <button class="tab-btn active" onclick="switchTab('pipelines', this)">Pipelines</button>
+        <button class="tab-btn" onclick="switchTab('ai', this)">AI Agent</button>
+      </div>
+
+      <!-- Pipeline Tab -->
+      <div class="tab-panel active" id="tab-pipelines">
+        <div id="job-pipelines">
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <p>Set up your company and post jobs to see pipelines here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Chat Tab (inline) -->
+      <div class="tab-panel" id="tab-ai">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="flex-center gap-2">
+              <div class="chat-avatar" style="width:26px;height:26px;font-size:12px;">⚡</div>
+              <div>
+                <div style="font-family:var(--font-display);font-size:0.88rem;font-weight:700;">Recruiter Agent</div>
+                <div style="font-size:0.7rem;color:var(--green);font-family:var(--font-mono);">● Online</div>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="clearAgentChat()">Clear</button>
+          </div>
+          <div id="inline-chat-messages" style="height:400px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
+            <div class="msg agent">I can find top candidates, summarize your pipeline, check application scores, or help write job descriptions. What do you need?</div>
+          </div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--bg-1);">
+            <input type="text" id="inline-chat-input" placeholder="e.g. Find top 3 candidates for Backend Engineer…" style="flex:1;" onkeydown="if(event.key==='Enter') sendInlineChat()">
+            <button class="btn btn-primary btn-sm" onclick="sendInlineChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upgrade Modal -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal">
+    <div class="modal-title">Upgrade Plan</div>
+    <p class="text-sm text-3">Simulated payment — no real card needed.</p>
+    <div class="upgrade-modal-plans">
+      <div class="upgrade-plan-opt selected" id="plan-basic" onclick="selectPlan('basic')">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price-sm">$29<span style="font-size:0.7rem;color:var(--text-3);">/mo</span></div>
+        <div class="plan-feat">Up to 5 active jobs<br>AI screening included</div>
+      </div>
+      <div class="upgrade-plan-opt" id="plan-pro" onclick="selectPlan('pro')">
+        <div class="plan-name" style="color:var(--purple);">Pro</div>
+        <div class="plan-price-sm" style="color:var(--purple);">$99<span style="font-size:0.7rem;color:var(--text-3);">/mo</span></div>
+        <div class="plan-feat">Unlimited jobs<br>Priority AI matching</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeUpgradeModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirm-upgrade-btn" onclick="confirmUpgrade()">Confirm (Simulated)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat (mobile / floating fallback) -->
+<div id="chat-toggle" style="display:none;">
+  <button class="chat-bubble-btn" onclick="openChat()"><span>⚡</span> Agent</button>
+</div>
+<div id="chat-widget" style="display:none;">
+  <div id="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">⚡</div>
+      <div><div class="chat-title">Recruiter Agent</div><div class="chat-status">● Online</div></div>
+    </div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask about candidates…" onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="btn btn-primary btn-sm" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
+
+<script src="/static/auth.js"></script>
+<script>
+  const user = checkAuthAndRedirect();
+  if (!user || user.role !== 'recruiter') window.location.href = '/static/index.html';
+
+  let companyId = null;
+  let chatHistory = [];
+  let inlineChatHistory = [];
+  let selectedUpgradePlan = 'basic';
+  let allAppData = {};
+
+  async function init() {
+    connectWebSocket();
+    await loadUser();
+    await loadCompany();
+  }
+
+  async function loadUser() {
+    const res = await apiFetch('/users/me');
+    if (res.ok) {
+      const me = await res.json();
+      document.getElementById('user-name').textContent = me.full_name || me.email;
+    }
+  }
+
+  async function loadCompany() {
+    const res = await apiFetch('/companies/');
+    if (!res.ok) return;
+    const comps = await res.json();
+    const myComp = comps.find(c => c.owner_id === user.sub);
+
+    if (myComp) {
+      companyId = myComp.id;
+      document.getElementById('company-info').classList.remove('hidden');
+      document.getElementById('comp-name').textContent = myComp.name;
+      const badge = document.getElementById('comp-plan-badge');
+      badge.textContent = myComp.plan.toUpperCase();
+      badge.className = `badge mono status-${myComp.plan}`;
+      if (myComp.plan !== 'free') {
+        document.getElementById('upgrade-link').textContent = myComp.plan === 'pro' ? '✓ Pro' : 'Upgrade ↑';
+      }
+      document.getElementById('stats-row').style.display = 'flex';
+      document.getElementById('main-tabs').style.display = 'flex';
+      loadPipelines();
+    } else {
+      document.getElementById('company-create').classList.remove('hidden');
+    }
+  }
+
+  async function createCompany() {
+    const name = document.getElementById('new-comp-name').value.trim();
+    const website = document.getElementById('new-comp-website').value.trim();
+    if (!name) return showToast('Company name is required.');
+    const res = await apiFetch('/companies/', {
+      method: 'POST',
+      body: { name, website: website || undefined }
+    });
+    if (res.ok) window.location.reload();
+    else { const e = await res.json(); showToast(e.detail || 'Failed to create company.'); }
+  }
+
+  async function postJob() {
+    if (!companyId) return showToast('Create a company first.');
+    const title = document.getElementById('j-title').value.trim();
+    const desc  = document.getElementById('j-desc').value.trim();
+    const reqs  = document.getElementById('j-reqs').value.trim();
+    if (!title || !desc || !reqs) return showToast('Fill in all job fields.');
+
+    const btn = document.getElementById('post-btn');
+    btn.textContent = 'Posting…';
+    btn.disabled = true;
+
+    const res = await apiFetch('/jobs/', {
+      method: 'POST',
+      body: {
+        title,
+        description: desc,
+        requirements: reqs,
+        company_id: companyId,
+        job_type: document.getElementById('j-type').value,
+        location: document.getElementById('j-location').value || undefined,
+        status: 'active'
+      }
+    });
+
+    if (res.ok) {
+      document.getElementById('j-title').value = '';
+      document.getElementById('j-desc').value = '';
+      document.getElementById('j-reqs').value = '';
+      document.getElementById('j-location').value = '';
+      showToast('Job posted. AI embedding task started.');
+      loadPipelines();
+    } else {
+      const e = await res.json();
+      showToast(e.detail || 'Failed to post job. Upgrade your plan?');
+    }
+    btn.textContent = 'Post Job';
+    btn.disabled = false;
+  }
+
+  async function loadPipelines() {
+    const res = await apiFetch('/jobs/');
+    if (!res.ok) return;
+    const allJobs = await res.json();
+    const myJobs = allJobs.filter(j => j.company_id === companyId);
+    document.getElementById('stat-jobs').textContent = myJobs.filter(j => j.status === 'active').length;
+    document.getElementById('pipeline-count').textContent = `${myJobs.length} job${myJobs.length !== 1 ? 's' : ''} in pipeline`;
+
+    const container = document.getElementById('job-pipelines');
+    if (!myJobs.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><p>No jobs posted yet. Use the sidebar to post your first job.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = myJobs.map(job => `
+      <div class="pipeline-block fade-in" id="block-${job.id}">
+        <div class="pipeline-header">
+          <div>
+            <div class="pipeline-title">${escHtml(job.title)}</div>
+            <div class="flex-center gap-2 mt-1">
+              <span class="badge mono status-${job.status}">${job.status}</span>
+              ${job.job_type ? `<span class="badge badge-muted">${job.job_type.replace('_',' ')}</span>` : ''}
+              ${job.location ? `<span class="text-xs text-3 mono">${escHtml(job.location)}</span>` : ''}
+            </div>
+          </div>
+          <div class="flex-center gap-2">
+            <button class="btn btn-sm" onclick="toggleApplicants('${job.id}', this)">
+              Load Applicants
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteJob('${job.id}')">Delete</button>
+          </div>
+        </div>
+        <div class="pipeline-body hidden" id="apps-${job.id}">
+          <div class="text-xs text-3">Loading…</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function toggleApplicants(jobId, btn) {
+    const body = document.getElementById(`apps-${jobId}`);
+    if (!body.classList.contains('hidden')) {
+      body.classList.add('hidden');
+      btn.textContent = 'Load Applicants';
+      return;
+    }
+    body.classList.remove('hidden');
+    btn.textContent = 'Hide';
+
+    const res = await apiFetch(`/applications/job/${jobId}`);
+    if (!res.ok) { body.innerHTML = '<p class="text-xs text-3">Failed to load.</p>'; return; }
+    const apps = await res.json();
+
+    // Update stats
+    const totalApps = Object.values(allAppData).reduce((s, a) => s + a, 0) + apps.length;
+    allAppData[jobId] = apps.length;
+    let totalAll = 0, totalShort = 0;
+    for (const [jid, count] of Object.entries(allAppData)) totalAll += count;
+    document.getElementById('stat-apps').textContent = totalAll;
+
+    if (!apps.length) {
+      body.innerHTML = '<div class="empty-state" style="padding:24px;"><p class="text-sm text-3">No applications yet.</p></div>';
+      return;
+    }
+
+    const shortlisted = apps.filter(a => a.status === 'shortlisted' || a.status === 'hired');
+    document.getElementById('stat-shortlisted').textContent =
+      parseInt(document.getElementById('stat-shortlisted').textContent || 0) + shortlisted.length;
+
+    body.innerHTML = apps.map(a => `
+      <div class="app-row">
+        <div class="app-row-top">
+          <div>
+            <div class="app-candidate">${escHtml(a.candidate_name || `Applicant ${a.id.substring(0,6)}`)}</div>
+            <span class="badge mono status-${a.status}">${a.status}</span>
+          </div>
+          <div class="flex-center gap-2">
+            ${a.ai_score !== null && a.ai_score !== undefined ? `
+              <div class="app-score-wrap">
+                <div class="score-bar" style="width:60px;"><div class="score-fill" style="width:${(a.ai_score*100).toFixed(0)}%"></div></div>
+                <div class="score-num">${(a.ai_score*100).toFixed(0)}%</div>
+              </div>
+            ` : '<span class="text-xs text-3 mono">Scoring…</span>'}
+            <select class="action-select" onchange="updateStatus('${a.id}', this.value, '${jobId}')">
+              <option value="" disabled selected>Update</option>
+              <option value="shortlisted">Shortlist</option>
+              <option value="rejected">Reject</option>
+              <option value="hired">Hired</option>
+            </select>
+          </div>
+        </div>
+        ${a.ai_summary ? `<div class="app-summary">"${escHtml(a.ai_summary)}"</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function updateStatus(appId, status, jobId) {
+    const res = await apiFetch(`/applications/${appId}/status`, {
+      method: 'PATCH',
+      body: { status }
+    });
+    if (res.ok) {
+      showToast(`Status updated to ${status}.`);
+      toggleApplicants(jobId, { textContent: '' });
+      toggleApplicants(jobId, document.querySelector(`#block-${jobId} .btn-sm`));
+    }
+  }
+
+  async function deleteJob(jobId) {
+    if (!confirm('Delete this job? This cannot be undone.')) return;
+    const res = await apiFetch(`/jobs/${jobId}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Job deleted.');
+      loadPipelines();
+    }
+  }
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'ai') setTimeout(() => document.getElementById('inline-chat-input').focus(), 100);
+  }
+
+  // Upgrade flow
+  function openUpgradeModal() {
+    document.getElementById('upgrade-modal').classList.add('active');
+  }
+
+  function closeUpgradeModal() {
+    document.getElementById('upgrade-modal').classList.remove('active');
+  }
+
+  function selectPlan(plan) {
+    selectedUpgradePlan = plan;
+    document.querySelectorAll('.upgrade-plan-opt').forEach(el => el.classList.remove('selected'));
+    document.getElementById('plan-' + plan).classList.add('selected');
+  }
+
+  async function confirmUpgrade() {
+    const btn = document.getElementById('confirm-upgrade-btn');
+    btn.textContent = 'Processing…';
+    btn.disabled = true;
+    const checkRes = await apiFetch('/payments/checkout', { method: 'POST', body: { plan: selectedUpgradePlan } });
+    if (!checkRes.ok) { showToast('Checkout failed.'); btn.textContent = 'Confirm'; btn.disabled = false; return; }
+    const { session_id } = await checkRes.json();
+    const confirmRes = await apiFetch(`/payments/confirm/${session_id}`, { method: 'POST' });
+    if (confirmRes.ok) {
+      showToast(`Plan upgraded to ${selectedUpgradePlan.toUpperCase()}! 🎉`);
+      closeUpgradeModal();
+      setTimeout(() => window.location.reload(), 1200);
+    } else {
+      showToast('Payment confirm failed.');
+    }
+    btn.textContent = 'Confirm (Simulated)';
+    btn.disabled = false;
+  }
+
+  // Inline chat
+  async function sendInlineChat() {
+    const input = document.getElementById('inline-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    inlineChatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    renderInlineChat();
+
+    const typingEl = document.createElement('div');
+    typingEl.className = 'msg typing';
+    typingEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    typingEl.id = 'typing-inline';
+    document.getElementById('inline-chat-messages').appendChild(typingEl);
+    document.getElementById('inline-chat-messages').scrollTop = 999999;
+
+    const res = await apiFetch('/ai/chat', { method: 'POST', body: { messages: inlineChatHistory } });
+    document.getElementById('typing-inline')?.remove();
+    if (res.ok) {
+      const data = await res.json();
+      inlineChatHistory.push({ role: 'model', content: data.reply || data.response || '' });
+    } else {
+      inlineChatHistory.push({ role: 'model', content: 'Something went wrong.' });
+    }
+    renderInlineChat();
+  }
+
+  function renderInlineChat() {
+    const box = document.getElementById('inline-chat-messages');
+    box.innerHTML = inlineChatHistory.map(m => `
+      <div class="msg ${m.role === 'user' ? 'user' : 'agent'}">${escHtml(m.content)}</div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function clearAgentChat() {
+    inlineChatHistory = [];
+    renderInlineChat();
+    document.getElementById('inline-chat-messages').innerHTML = '<div class="msg agent">Cleared. What do you need?</div>';
+  }
+
+  function openChat() {}
+  function closeChat() {}
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('upgrade-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeUpgradeModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

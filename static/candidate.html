@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireFlow — Candidate Portal</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .resume-upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r-md);
+      padding: 18px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-1);
+      position: relative;
+    }
+
+    .resume-upload-zone:hover,
+    .resume-upload-zone.dragover {
+      border-color: rgba(0,212,255,0.35);
+      background: var(--cyan-dim);
+    }
+
+    .resume-upload-zone input {
+      position: absolute;
+      opacity: 0;
+      inset: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 22px; margin-bottom: 6px; }
+    .upload-label { font-size: 0.8rem; color: var(--text-3); }
+    .upload-label span { color: var(--cyan-text); }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar .search-wrap { flex: 1; min-width: 200px; }
+
+    .filter-select {
+      width: auto;
+      padding: 9px 32px 9px 12px;
+      font-size: 0.84rem;
+    }
+
+    .cover-letter-area {
+      resize: vertical;
+      min-height: 120px;
+      font-size: 0.88rem;
+    }
+
+    .app-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green    { background: var(--green); box-shadow: 0 0 5px var(--green); }
+    .dot-amber    { background: var(--amber); }
+    .dot-red      { background: var(--red); }
+    .dot-cyan     { background: var(--cyan); }
+    .dot-muted    { background: var(--text-3); }
+
+    .empty-jobs {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 24px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="notifications"></div>
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        HireFlow
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-name" id="user-name">Loading…</div>
+      <div class="user-role">Candidate</div>
+    </div>
+
+    <!-- Resume Upload -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Resume</div>
+      <div class="resume-upload-zone" id="upload-zone">
+        <input type="file" id="resume-file" accept=".pdf" onchange="handleFileSelect(this)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label"><span>Click to upload</span> or drag PDF</div>
+      </div>
+      <div id="resume-status" class="mt-1 text-xs text-3 mono"></div>
+      <button class="btn btn-primary btn-full mt-2" id="upload-btn" onclick="uploadResume()" style="display:none;">
+        Upload Resume
+      </button>
+    </div>
+
+    <!-- My Applications -->
+    <div class="sidebar-section" style="flex:1; overflow-y:auto;">
+      <div class="sidebar-label">My Applications</div>
+      <div id="my-apps">
+        <div class="text-xs text-3" style="padding-top:4px;">No applications yet.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-full" onclick="logout()" style="color:var(--text-3);">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="page-title" style="font-size:1rem; margin-bottom:0;">Job Board</div>
+        <div class="text-xs text-3 mono" id="jobs-count">Loading…</div>
+      </div>
+      <div class="flex-center gap-3">
+        <button class="notif-btn" id="notif-btn" title="Notifications">
+          🔔
+          <div class="notif-badge hidden" id="notif-dot"></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="page-area">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="search-wrap flex-center gap-2" style="position:relative;">
+          <span class="search-icon" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:13px;">🔍</span>
+          <input type="text" id="search-input" placeholder="Search jobs, skills, location…" style="padding-left:36px; width:100%;" oninput="onSearch(this.value)">
+        </div>
+        <select class="filter-select" id="type-filter" onchange="applyFilters()">
+          <option value="">All Types</option>
+          <option value="full_time">Full Time</option>
+          <option value="part_time">Part Time</option>
+          <option value="contract">Contract</option>
+          <option value="remote">Remote</option>
+        </select>
+      </div>
+
+      <!-- Jobs Grid -->
+      <div class="grid-auto" id="job-list">
+        <div class="skeleton" style="height:180px; border-radius:var(--r-lg);"></div>
+        <div class="skeleton" style="height:180px; border-radius:var(--r-lg);"></div>
+        <div class="skeleton" style="height:180px; border-radius:var(--r-lg);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Modal -->
+<div class="modal-overlay" id="apply-modal">
+  <div class="modal">
+    <div class="modal-title">Apply — <span id="apply-job-title" style="color:var(--cyan-text);"></span></div>
+    <p class="text-sm text-3 mb-2">Add a cover letter to strengthen your application (optional).</p>
+    <div class="form-group">
+      <label>Cover Letter</label>
+      <textarea id="cover-letter" class="cover-letter-area" placeholder="Tell them why you're a great fit…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeApplyModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitApplication()">Submit Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Toggle -->
+<div id="chat-toggle">
+  <button class="chat-bubble-btn" onclick="openChat()">
+    <span>⚡</span> HireFlow Agent
+  </button>
+</div>
+
+<!-- Chat Widget -->
+<div id="chat-widget">
+  <div id="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">⚡</div>
+      <div>
+        <div class="chat-title">HireFlow Agent</div>
+        <div class="chat-status">● Online</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div id="chat-messages">
+    <div class="msg agent">Hi! I can help you find matching jobs, check your application status, or answer any hiring questions. What do you need?</div>
+  </div>
+  <div id="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask me anything…" onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="btn btn-primary btn-sm" onclick="sendChatMessage()">Send</button>
+  </div>
+</div>
+
+<script src="/static/auth.js"></script>
+<script>
+  const user = checkAuthAndRedirect();
+  if (!user || user.role !== 'candidate') window.location.href = '/static/index.html';
+
+  let currentJobId = null;
+  let currentJobTitle = null;
+  let chatHistory = [];
+  let allJobs = [];
+  let selectedFile = null;
+  let searchTimeout = null;
+
+  async function init() {
+    connectWebSocket();
+    loadUser();
+    loadJobs();
+    loadApplications();
+  }
+
+  async function loadUser() {
+    const res = await apiFetch('/users/me');
+    if (res.ok) {
+      const me = await res.json();
+      document.getElementById('user-name').textContent = me.full_name || me.email;
+    }
+  }
+
+  async function loadJobs(query = '') {
+    const endpoint = query ? `/jobs/search?q=${encodeURIComponent(query)}` : '/jobs/';
+    const res = await apiFetch(endpoint);
+    if (res.ok) {
+      allJobs = await res.json();
+      renderJobs(applyLocalFilter(allJobs));
+    }
+  }
+
+  function applyLocalFilter(jobs) {
+    const type = document.getElementById('type-filter').value;
+    if (!type) return jobs;
+    return jobs.filter(j => j.job_type === type);
+  }
+
+  function applyFilters() {
+    renderJobs(applyLocalFilter(allJobs));
+  }
+
+  function onSearch(val) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => loadJobs(val.trim()), 300);
+  }
+
+  function renderJobs(jobs) {
+    const container = document.getElementById('job-list');
+    const count = document.getElementById('jobs-count');
+    count.textContent = `${jobs.length} active listing${jobs.length !== 1 ? 's' : ''}`;
+
+    if (!jobs.length) {
+      container.innerHTML = `
+        <div class="empty-jobs">
+          <div style="font-size:32px; opacity:0.3; margin-bottom:12px;">📋</div>
+          <p class="text-sm text-3">No jobs found. Try a different search.</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = jobs.map((j, i) => `
+      <div class="job-card fade-in stagger-${Math.min(i+1,4)}" onclick="openApplyModal('${j.id}', '${escHtml(j.title)}')">
+        <div>
+          <div class="job-card-title">${escHtml(j.title)}</div>
+          <div class="job-card-company text-xs text-3 mono mt-1">${j.company_id ? 'Company' : '—'} · ${j.location || 'Location not specified'}</div>
+        </div>
+        <div class="job-card-meta">
+          <span class="badge badge-green">Active</span>
+          ${j.job_type ? `<span class="badge badge-muted">${j.job_type.replace('_', ' ')}</span>` : ''}
+          ${j.salary_range ? `<span class="badge badge-amber">${j.salary_range}</span>` : ''}
+        </div>
+        <p class="job-card-desc">${escHtml(j.description)}</p>
+        <button class="btn btn-sm btn-primary" style="align-self:flex-start;" onclick="event.stopPropagation(); openApplyModal('${j.id}', '${escHtml(j.title)}')">
+          Apply Now →
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function loadApplications() {
+    const res = await apiFetch('/applications/me');
+    const container = document.getElementById('my-apps');
+    if (!res.ok) return;
+    const apps = await res.json();
+    if (!apps.length) {
+      container.innerHTML = '<div class="text-xs text-3" style="padding-top:4px;">No applications yet.</div>';
+      return;
+    }
+    const dotClass = { shortlisted:'dot-cyan', hired:'dot-green', rejected:'dot-red', screening:'dot-amber', pending:'dot-muted' };
+    container.innerHTML = apps.map(a => `
+      <div class="app-item">
+        <div class="flex-center gap-2 mb-1">
+          <div class="app-status-dot ${dotClass[a.status] || 'dot-muted'}"></div>
+          <div class="app-item-title">${escHtml(a.job_title || 'Application')}</div>
+        </div>
+        <div class="flex-center gap-2">
+          <span class="badge badge badge-muted mono text-xs status-${a.status}">${a.status}</span>
+          ${a.ai_score !== null && a.ai_score !== undefined ? `<span class="text-xs text-3 mono">AI: ${(a.ai_score*100).toFixed(0)}%</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('notif-dot').classList.remove('hidden');
+  }
+
+  function handleFileSelect(input) {
+    selectedFile = input.files[0];
+    if (selectedFile) {
+      document.getElementById('resume-status').textContent = `📎 ${selectedFile.name}`;
+      document.getElementById('upload-btn').style.display = 'block';
+    }
+  }
+
+  async function uploadResume() {
+    if (!selectedFile) return;
+    const btn = document.getElementById('upload-btn');
+    btn.textContent = 'Uploading…';
+    btn.disabled = true;
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    const res = await apiFetch('/users/me/resume', { method: 'POST', body: formData });
+    if (res.ok) {
+      document.getElementById('resume-status').textContent = '✅ Resume uploaded & indexed';
+      document.getElementById('resume-status').style.color = 'var(--green)';
+      btn.style.display = 'none';
+      selectedFile = null;
+      showToast('Resume uploaded! AI matching task started.');
+    } else {
+      document.getElementById('resume-status').textContent = '❌ Upload failed';
+      document.getElementById('resume-status').style.color = 'var(--red)';
+      btn.textContent = 'Retry Upload';
+      btn.disabled = false;
+    }
+  }
+
+  // Drag and drop
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      selectedFile = file;
+      document.getElementById('resume-status').textContent = `📎 ${file.name}`;
+      document.getElementById('upload-btn').style.display = 'block';
+    }
+  });
+
+  function openApplyModal(jobId, title) {
+    currentJobId = jobId;
+    currentJobTitle = title;
+    document.getElementById('apply-job-title').textContent = title;
+    document.getElementById('cover-letter').value = '';
+    document.getElementById('apply-modal').classList.add('active');
+  }
+
+  function closeApplyModal() {
+    document.getElementById('apply-modal').classList.remove('active');
+    currentJobId = null;
+  }
+
+  async function submitApplication() {
+    if (!currentJobId) return;
+    const btn = event.target;
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+    const cover = document.getElementById('cover-letter').value;
+    const res = await apiFetch('/applications/', {
+      method: 'POST',
+      body: { job_id: currentJobId, cover_letter: cover }
+    });
+    if (res.ok) {
+      closeApplyModal();
+      showToast(`Applied to ${currentJobTitle}! AI screening started.`);
+      loadApplications();
+    } else {
+      const err = await res.json();
+      showToast(`Error: ${err.detail || 'Application failed.'}`);
+    }
+    btn.textContent = 'Submit Application';
+    btn.disabled = false;
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    chatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    renderChat();
+    // Typing indicator
+    const typingEl = document.createElement('div');
+    typingEl.className = 'msg typing';
+    typingEl.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    typingEl.id = 'typing-indicator';
+    document.getElementById('chat-messages').appendChild(typingEl);
+    document.getElementById('chat-messages').scrollTop = 999999;
+
+    const res = await apiFetch('/ai/chat', { method: 'POST', body: { messages: chatHistory } });
+    document.getElementById('typing-indicator')?.remove();
+    if (res.ok) {
+      const data = await res.json();
+      const reply = data.reply || data.response || '';
+      chatHistory.push({ role: 'model', content: reply });
+    } else {
+      chatHistory.push({ role: 'model', content: 'Something went wrong. Please try again.' });
+    }
+    renderChat();
+  }
+
+  function renderChat() {
+    const box = document.getElementById('chat-messages');
+    box.innerHTML = chatHistory.map(m => `
+      <div class="msg ${m.role === 'user' ? 'user' : 'agent'}">${escHtml(m.content)}</div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function openChat() {
+    document.getElementById('chat-widget').style.display = 'flex';
+    document.getElementById('chat-toggle').style.display = 'none';
+    setTimeout(() => document.getElementById('chat-input').focus(), 100);
+  }
+
+  function closeChat() {
+    document.getElementById('chat-widget').style.display = 'none';
+    document.getElementById('chat-toggle').style.display = 'block';
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Close modal on overlay click
+  document.getElementById('apply-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeApplyModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

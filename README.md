@@ -2,13 +2,14 @@
 
 An AI-powered hiring platform built with FastAPI. Companies post jobs, candidates apply, and an AI agent handles matching, screening, and communication — reducing manual recruiter work.
 
-Built as an AI-assisted portfolio project to demonstrate production-grade backend architecture: async PostgreSQL, JWT auth, Celery background tasks, ChromaDB vector search, Gemini 2.0 Flash tool-use agents, WebSockets, and a simulated payment system.Frontend was done with the help of AI.
+Built as an AI-assisted portfolio project to demonstrate production-grade backend architecture: async PostgreSQL, JWT auth, Celery background tasks, ChromaDB vector search, Gemini 2.0 Flash tool-use agents, WebSockets, and a simulated payment system.
+
+Frontend was done with the help of AI.
 
 ---
 
 ## Screenshots
 
-> _Add screenshots/GIFs here after recording. Suggested captures:_
 > - `index.html` — landing/auth page
 ![alt text](image.png)
 > - `recruiter.html` — recruiter console with pipeline and AI Agent tab

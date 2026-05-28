@@ -1,0 +1,16 @@
+# Hiring Guidelines
+
+## Job Description Best Practices
+Write clear, concise job descriptions. Include required skills, experience level, and key responsibilities. Avoid jargon and bias. Use gender-neutral language. Specify remote/hybrid/onsite expectations. List salary range if possible.
+
+## Screening Criteria
+Look for relevant experience first. Then check for required technical skills. Cultural fit matters but should never override competence. Use structured interviews. Score candidates objectively.
+
+## Interview Tips
+Prepare behavioral questions (e.g., "Tell me about a time you solved a difficult problem"). Use work samples when possible. Avoid leading questions. Take notes during the interview.
+
+## Reducing Bias
+Blind resume screening removes names and demographic info. Use skill assessments instead of pedigree. Set consistent evaluation rubrics. Train interviewers on bias awareness.
+
+## Offer Process
+Move quickly after a good interview. Get feedback within 24 hours. Present offer with clear terms. Allow negotiation but be fair. Onboarding starts the day the offer is accepted.

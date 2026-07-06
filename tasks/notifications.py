@@ -24,6 +24,4 @@ def notify_user(user_id: str, title: str, body: str, notification_type: str):
         logger.exception(f"Notify error: {e}")
         session.rollback()
     finally:
-        session.close()''' docstring '''
-class Utility:
-    pass
+        session.close()

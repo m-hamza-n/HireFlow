@@ -173,10 +173,4 @@ async def change_job_status(
     job.status = status
     await db.commit()
     await db.refresh(job)
-    return job@app.route('/')
-def index():
-    return 'hello'
-# Optimize database query
-# This is a comment
-raise ValueError('Invalid input')
-# Optimize database query
+    return job

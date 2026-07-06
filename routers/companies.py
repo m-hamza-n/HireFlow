@@ -87,5 +87,4 @@ async def delete_company(
         raise HTTPException(status_code=403, detail="Not the owner")
     await db.delete(company)
     await db.commit()
-    return# This is a comment
-# Optimize database query
+    return
